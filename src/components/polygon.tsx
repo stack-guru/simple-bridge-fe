@@ -6,6 +6,7 @@ import { erc20Abi, parseUnits } from "viem"
 import { useState } from "react"
 import { config } from "@/assets/config"
 import { POLYGON_ADDRESS, TEST_USDT } from "@/utils/constants"
+import { airdrop } from "@/utils/func"
 import { abi } from "@/assets/abi"
 
 export default function Polygon() {
@@ -14,6 +15,10 @@ export default function Polygon() {
 
     const [mintAmount, setMintAmount] = useState("")
     const { writeContractAsync } = useWriteContract()
+
+    const getAirdrop = async () => {
+        airdrop()
+    }
 
     const mintUSDV = async () => {
         if (!mintAmount) {
@@ -69,19 +74,16 @@ export default function Polygon() {
                 <Card.Title>Get USDV on Solana</Card.Title>
             </Card.Header>
             <Card.Body>
-                {/* <Field.Root>
-                      <Field.Label>
-                        Solana Address <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input placeholder="Solana Address" readOnly value={connected ? publicKey?.toBase58()! : ""} />
-                      <Field.HelperText>Solana Address</Field.HelperText>
-                    </Field.Root> */}
+                <Text fontSize={"sm"} marginBottom={2}>Airdrop TEST USDT</Text>
+                <Button onClick={getAirdrop}>Airdrop 10</Button>
+                <Separator marginY={4} />
+
                 <Text fontSize={"sm"} marginBottom={2}>Mint USDV (USDT{"->"}USDV)</Text>
                 <HStack>
                     <Input type="number" placeholder="Amount" value={mintAmount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMintAmount(e.target.value)} />
                     <Button onClick={mintUSDV}>Mint</Button>
                 </HStack>
-                <Separator marginTop={4} />
+                <Separator marginY={4} />
             </Card.Body>
             <Card.Footer justifyContent={"center"}>
                 <Button marginTop={4}>Get</Button>
