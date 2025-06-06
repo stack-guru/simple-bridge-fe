@@ -1,12 +1,26 @@
 import { useState } from 'react'
 import { Button, Box, Heading, Card, HStack, Center, Icon, Input, Field } from "@chakra-ui/react"
+import { useWallet } from "@solana/wallet-adapter-react"
+import {
+  WalletDisconnectButton,
+  WalletModalProvider,
+  WalletMultiButton,
+  WalletModalButton
+} from "@solana/wallet-adapter-react-ui"
+import "@solana/wallet-adapter-react-ui/styles.css"
 
 function App() {
+  const wallet = useWallet()
+
   return (
     <Box padding={4}>
       <Heading marginTop={8} size={"4xl"} textAlign={"center"}>Bridge Testing!</Heading>
-      <Box textAlign={"center"}>
-
+      <Box marginTop={8} display={"flex"} justifyContent={"center"}>
+        <WalletModalProvider>
+          <WalletModalButton />
+          {/* <WalletMultiButton /> */}
+          {/* <WalletDisconnectButton /> */}
+        </WalletModalProvider>
       </Box>
       <HStack align={"center"} width={"full"} justifyContent={"center"} gap={8} marginTop={16}>
         <Card.Root width={"520px"}>
