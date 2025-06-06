@@ -14,9 +14,9 @@ function App() {
   const { connected } = useWallet()
 
   return (
-    <Box>
+    <Box paddingTop={8}>
       <Toaster />
-      <Heading marginTop={8} size={"4xl"} textAlign={"center"}>Bridge Testing!</Heading>
+      <Heading size={"4xl"} textAlign={"center"}>Bridge Testing!</Heading>
       <Box marginTop={8} display={"flex"} justifyContent={"center"}>
         <VStack>
           <Box textAlign={"center"}>
@@ -46,13 +46,6 @@ function App() {
             <Card.Title mb="2">Redeem USDV on Solana</Card.Title>
           </Card.Header>
           <Card.Body>
-            {/* <Field.Root>
-              <Field.Label>
-                Polygon Address <Field.RequiredIndicator />
-              </Field.Label>
-              <Input placeholder="Polygon Address" readOnly value={account.isConnected ? account.address : ""} />
-              <Field.HelperText>Polygon Address</Field.HelperText>
-            </Field.Root> */}
           </Card.Body>
           <Card.Footer justifyContent={"center"}>
             <Button marginTop={4}>Redeem</Button>
