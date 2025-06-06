@@ -1,5 +1,4 @@
 import { Button, Box, Heading, Card, HStack, VStack, Center, Icon, Input, Field, Text, Separator } from "@chakra-ui/react"
-import { useAccount, useWriteContract } from 'wagmi'
 import { useWallet } from "@solana/wallet-adapter-react"
 import { Toaster, toaster } from "@/components/ui/toaster"
 import {
@@ -12,9 +11,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Polygon from "./components/polygon"
 
 function App() {
-  const { connected, publicKey } = useWallet()
-  const account = useAccount()
-  const { writeContract } = useWriteContract()
+  const { connected } = useWallet()
 
   return (
     <Box>

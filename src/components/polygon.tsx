@@ -1,4 +1,4 @@
-import { Button, Box, Heading, Card, HStack, VStack, Center, Icon, Input, Field, Text, Separator } from "@chakra-ui/react"
+import { Button, Box, Heading, Card, HStack, VStack, Center, Icon, Input, Field, Text, Separator, Spinner } from "@chakra-ui/react"
 import { useAccount, useWriteContract, usePublicClient } from 'wagmi'
 import { readContract } from '@wagmi/core'
 import { Toaster, toaster } from "@/components/ui/toaster"
@@ -15,9 +15,19 @@ export default function Polygon() {
 
     const [mintAmount, setMintAmount] = useState("")
     const { writeContractAsync } = useWriteContract()
+    const [isAirdrop, setIsAirdrop] = useState(false)
 
     const getAirdrop = async () => {
-        airdrop()
+        setIsAirdrop(true)
+        const trx = await airdrop(account.address)
+        if (trx) {
+            await pClient?.waitForTransactionReceipt({ hash: trx })
+            toaster.create({
+                description: "Airdropped!",
+                type: "success"
+            })
+        }
+        setIsAirdrop(false)
     }
 
     const mintUSDV = async () => {
@@ -75,7 +85,11 @@ export default function Polygon() {
             </Card.Header>
             <Card.Body>
                 <Text fontSize={"sm"} marginBottom={2}>Airdrop TEST USDT</Text>
-                <Button onClick={getAirdrop}>Airdrop 10</Button>
+                <Button onClick={getAirdrop} disabled={isAirdrop}>
+                    {
+                        isAirdrop ? <Spinner /> : <Text>Airdrop 10</Text>
+                    }
+                </Button>
                 <Separator marginY={4} />
 
                 <Text fontSize={"sm"} marginBottom={2}>Mint USDV (USDT{"->"}USDV)</Text>
