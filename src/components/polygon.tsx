@@ -5,6 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react"
 import { readContract } from '@wagmi/core'
 import { Toaster, toaster } from "@/components/ui/toaster"
 import { erc20Abi, parseUnits } from "viem"
+import useProgram from "@/hooks/useProgram"
 import { config } from "@/assets/config"
 import { POLYGON_ADDRESS, TEST_USDT } from "@/utils/constants"
 import { airdrop, getEvmVaa } from "@/utils/polygon"
@@ -14,6 +15,7 @@ export default function Polygon() {
     const account = useAccount()
     const pClient = usePublicClient()
     const solWallet = useWallet()
+    const program = useProgram()
 
     const [mintAmount, setMintAmount] = useState("")
     const [transferAmount, setTransferAmount] = useState("")

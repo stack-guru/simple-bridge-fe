@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^3.19.2",
+    "@coral-xyz/anchor": "^0.29.0",
     "@emotion/react": "^11.14.0",
     "@rainbow-me/rainbowkit": "^2.2.6",
+    "@solana/spl-token": "^0.4.13",
     "@solana/wallet-adapter-base": "^0.9.26",
     "@solana/wallet-adapter-react": "^0.15.38",
     "@solana/wallet-adapter-react-ui": "^0.9.38",
