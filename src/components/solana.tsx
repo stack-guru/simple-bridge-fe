@@ -7,11 +7,21 @@ import { toaster } from "@/components/ui/toaster"
 export default function Solana() {
     const [redeemAmount, setRedeemAmount] = useState("")
     const { program, connection, anchorWallet } = useProgram()
+    const [isRedeem, setIsRedeem] = useState(false)
 
     const redeemToken = async () => {
-        console.log('redeem token')
+        if (!redeemAmount) {
+            toaster.create({
+                description: "Please input redeem amount",
+                type: "error"
+            })
+
+            return
+        }
+
+        setIsRedeem(true)
         try {
-            burnAndSend(program, redeemAmount, connection, anchorWallet!)
+            await burnAndSend(program, redeemAmount, connection, anchorWallet!)
         } catch (err) {
             console.log('burn and send err: ', err)
             toaster.create({
@@ -19,6 +29,7 @@ export default function Solana() {
                 type: "error"
             })
         }
+        setIsRedeem(false)
     }
 
     return (
@@ -29,7 +40,7 @@ export default function Solana() {
             <Card.Body>
                 <Text fontSize={"sm"} marginBottom={2}>USDV{`->`}USDT</Text>
                 <Input type="number" placeholder="Amount" value={redeemAmount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRedeemAmount(e.target.value)} />
-                <Button marginTop={4} onClick={redeemToken}>Redeem</Button>
+                <Button marginTop={4} onClick={redeemToken} loading={isRedeem}>Redeem</Button>
             </Card.Body>
         </Card.Root>
     )
