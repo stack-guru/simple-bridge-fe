@@ -9,6 +9,7 @@ import {
 import "@solana/wallet-adapter-react-ui/styles.css"
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Polygon from "./components/polygon"
+import Solana from "./components/solana"
 
 function App() {
   const { connected } = useWallet()
@@ -41,16 +42,7 @@ function App() {
       <HStack align={"center"} width={"full"} justifyContent={"center"} gap={8} marginTop={8}>
         <Polygon />
 
-        <Card.Root width={"540px"}>
-          <Card.Header>
-            <Card.Title mb="2">Redeem USDV on Solana</Card.Title>
-          </Card.Header>
-          <Card.Body>
-          </Card.Body>
-          <Card.Footer justifyContent={"center"}>
-            <Button marginTop={4}>Redeem</Button>
-          </Card.Footer>
-        </Card.Root>
+        <Solana />
       </HStack>
     </Box>
   )

@@ -5,6 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react"
 import { readContract } from '@wagmi/core'
 import { Toaster, toaster } from "@/components/ui/toaster"
 import { erc20Abi, parseUnits } from "viem"
+// import { NodeWallet, postVaaSolana } from "@certusone/wormhole-sdk/lib/cjs/solana";
 import useProgram from "@/hooks/useProgram"
 import { config } from "@/assets/config"
 import { POLYGON_ADDRESS, TEST_USDT } from "@/utils/constants"
@@ -15,7 +16,7 @@ export default function Polygon() {
     const account = useAccount()
     const pClient = usePublicClient()
     const solWallet = useWallet()
-    const program = useProgram()
+    const { program } = useProgram()
 
     const [mintAmount, setMintAmount] = useState("")
     const [transferAmount, setTransferAmount] = useState("")
@@ -119,7 +120,13 @@ export default function Polygon() {
             await pClient?.waitForTransactionReceipt({ hash: sent })
             const vaa = await getEvmVaa(sent)
             if (vaa) {
-                
+                // const posted = await postVaaSolana(
+                //     connection,
+                //     nodeWallet.signTransaction,
+                //     CORE_CONTRACT,
+                //     nodeWallet.key(),
+                //     Buffer.from(vaa.bytes)
+                // );
             }
         } catch (err) {
             console.log('transfer err: ', err)
