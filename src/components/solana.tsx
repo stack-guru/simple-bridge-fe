@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Card, Button, Input, Text } from "@chakra-ui/react"
 import useProgram from "@/hooks/useProgram"
 import { burnAndSend } from "@/utils/solana"
+import { toaster } from "@/components/ui/toaster"
 
 export default function Solana() {
     const [redeemAmount, setRedeemAmount] = useState("")
@@ -9,7 +10,15 @@ export default function Solana() {
 
     const redeemToken = async () => {
         console.log('redeem token')
-        burnAndSend(program, redeemAmount, connection, anchorWallet!)
+        try {
+            burnAndSend(program, redeemAmount, connection, anchorWallet!)
+        } catch (err) {
+            console.log('burn and send err: ', err)
+            toaster.create({
+                description: "Failed :(",
+                type: "error"
+            })
+        }
     }
 
     return (

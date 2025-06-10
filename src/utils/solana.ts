@@ -1,6 +1,5 @@
 import * as anchor from "@coral-xyz/anchor"
 import {
-    getAccount,
     getAssociatedTokenAddress
 } from "@solana/spl-token"
 import { PublicKey, Connection, type PublicKeyInitData } from "@solana/web3.js";
@@ -8,6 +7,7 @@ import { utils } from '@wormhole-foundation/sdk-solana';
 import { utils as solanaCoreUtils } from "@wormhole-foundation/sdk-solana-core";
 import { DECIMAL, WOMRHOLE_CORE_ADDRESS, TEST_USDV_SOLANA, SOLANA_ADDRESS } from "./constants"
 import { type AnchorWallet } from "@solana/wallet-adapter-react";
+import { Buffer } from 'buffer';
 
 const realConfig = utils.deriveAddress([Buffer.from("config")], SOLANA_ADDRESS);
 const mint = new PublicKey(TEST_USDV_SOLANA)
@@ -36,6 +36,7 @@ function deriveWormholeMessageKey(
 export const burnAndSend = async (program: any, amount: string, connection: Connection, wallet: AnchorWallet) => {
     try {
         const burnAmount = parseUnits(amount, DECIMAL)
+        console.log('burn amount = ', burnAmount)
 
         const sequence = (
             await solanaCoreUtils.getProgramSequenceTracker(connection, program.programId, WOMRHOLE_CORE_ADDRESS)
@@ -48,11 +49,13 @@ export const burnAndSend = async (program: any, amount: string, connection: Conn
             wallet.publicKey,
             deriveWormholeMessageKey(program.programId, sequence) // sequence should be increased for every test
         )
+        console.log('wormholeCpi = ', wormholeCpi)
 
         const userTokenAccount = await getAssociatedTokenAddress(
             mint,
             wallet.publicKey
         );
+        console.log('userTokenAccount = ', userTokenAccount)
 
         const tx = await program.methods
             .burnAndSend(new anchor.BN(burnAmount))
@@ -75,7 +78,8 @@ export const burnAndSend = async (program: any, amount: string, connection: Conn
             .rpc()
 
         console.log("Burn + Wormhole Message Tx:", tx)
+        return tx
     } catch (err) {
-        console.log('burn and send err: ', err)
+        throw err
     }
 }

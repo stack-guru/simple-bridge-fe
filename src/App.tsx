@@ -41,7 +41,6 @@ function App() {
       </Box>
       <HStack align={"center"} width={"full"} justifyContent={"center"} gap={8} marginTop={8}>
         <Polygon />
-
         <Solana />
       </HStack>
     </Box>

@@ -3,7 +3,7 @@ import { Button, Box, Heading, Card, HStack, VStack, Center, Icon, Input, Field,
 import { useAccount, useWriteContract, usePublicClient } from 'wagmi'
 import { useWallet } from "@solana/wallet-adapter-react"
 import { readContract } from '@wagmi/core'
-import { Toaster, toaster } from "@/components/ui/toaster"
+import { toaster } from "@/components/ui/toaster"
 import { erc20Abi, parseUnits } from "viem"
 // import { NodeWallet, postVaaSolana } from "@certusone/wormhole-sdk/lib/cjs/solana";
 import useProgram from "@/hooks/useProgram"
