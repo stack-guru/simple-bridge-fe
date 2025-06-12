@@ -5,18 +5,18 @@ import { useWallet } from "@solana/wallet-adapter-react"
 import { readContract } from '@wagmi/core'
 import { toaster } from "@/components/ui/toaster"
 import { erc20Abi, parseUnits } from "viem"
-// import { NodeWallet, postVaaSolana } from "@certusone/wormhole-sdk/lib/cjs/solana";
 import useProgram from "@/hooks/useProgram"
 import { config } from "@/assets/config"
 import { POLYGON_ADDRESS, TEST_USDT } from "@/utils/constants"
 import { airdrop, getEvmVaa } from "@/utils/polygon"
+import { receiveMsgSolana } from "@/utils/solana"
 import { abi } from "@/assets/abi"
 
 export default function Polygon() {
     const account = useAccount()
     const pClient = usePublicClient()
     const solWallet = useWallet()
-    // const { program } = useProgram()
+    const { program, connection } = useProgram()
 
     const [mintAmount, setMintAmount] = useState("")
     const [transferAmount, setTransferAmount] = useState("")
@@ -24,6 +24,7 @@ export default function Polygon() {
     const [isAirdrop, setIsAirdrop] = useState(false)
     const [isMint, setIsMint] = useState(false)
     const [isTransfer, setIsTransfer] = useState(false)
+    const [loadingText, setLoadingText] = useState("")
 
     const getAirdrop = async () => {
         setIsAirdrop(true)
@@ -75,7 +76,7 @@ export default function Polygon() {
                 })
 
                 const realAmount = Number(mintAmount) * 0.999
-                writeContractAsync({
+                const minted = await writeContractAsync({
                     abi,
                     address: POLYGON_ADDRESS,
                     functionName: 'mintToken',
@@ -83,6 +84,13 @@ export default function Polygon() {
                         parseUnits(realAmount.toString(), 6)
                     ],
                 })
+                const state = await pClient?.waitForTransactionReceipt({ hash: minted })
+                if (state?.status === "success") {
+                    toaster.create({
+                        description: "Minted!",
+                        type: "success"
+                    })
+                }
             }
         } catch (err) {
             console.log('err: ', err)
@@ -120,16 +128,20 @@ export default function Polygon() {
                 ],
             })
             const state = await pClient?.waitForTransactionReceipt({ hash: sent })
+
             if (state?.status === "success") {
-                const vaa = await getEvmVaa(sent)
-                if (vaa) {
-                    // const posted = await postVaaSolana(
-                    //     connection,
-                    //     nodeWallet.signTransaction,
-                    //     CORE_CONTRACT,
-                    //     nodeWallet.key(),
-                    //     Buffer.from(vaa.bytes)
-                    // );
+                console.log('sent trx = ', sent)
+                setLoadingText("Searching Wormhole")
+                const { vaa, hex } = await getEvmVaa(sent)
+                setLoadingText("")
+
+                if (vaa && hex) {
+                    await receiveMsgSolana(program, connection, solWallet, hex, vaa)
+                } else {
+                    toaster.create({
+                        description: "Wormhole scan error",
+                        type: "error"
+                    })
                 }
             }
         } catch (err) {
@@ -141,7 +153,7 @@ export default function Polygon() {
     return (
         <Card.Root width={"540px"}>
             <Card.Header>
-                <Card.Title>Get USDV on Solana</Card.Title>
+                <Card.Title>Get USDV on Solana (Polygon to Solana)</Card.Title>
             </Card.Header>
             <Card.Body>
                 <Text fontSize={"sm"} marginBottom={2}>Airdrop TEST USDT</Text>
@@ -162,7 +174,7 @@ export default function Polygon() {
                 <Text fontSize={"sm"} marginBottom={2}>Get USDV on Solana</Text>
                 <HStack>
                     <Input type="number" placeholder="Amount" value={transferAmount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTransferAmount(e.target.value)} />
-                    <Button onClick={transferUSDV} bgColor={"blue.500"} loading={isTransfer}>
+                    <Button onClick={transferUSDV} bgColor={"blue.500"} loading={isTransfer} loadingText={loadingText}>
                         Transfer
                     </Button>
                 </HStack>

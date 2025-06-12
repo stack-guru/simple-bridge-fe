@@ -20,8 +20,10 @@ import evm from "@wormhole-foundation/sdk/evm";
 import solana from "@wormhole-foundation/sdk/solana";
 import { utils as solanaCoreUtils } from "@wormhole-foundation/sdk-solana-core";
 import { DECIMAL, WOMRHOLE_CORE_ADDRESS, TEST_USDV_SOLANA, TEST_USDT, SOLANA_ADDRESS, ETH_PRIVATE_KEY, SOL_PRIVATE_KEY, POLY_USDT } from "./constants"
-import { type AnchorWallet } from "@solana/wallet-adapter-react";
+import { type AnchorWallet, type WalletContextState } from "@solana/wallet-adapter-react";
 import { Buffer } from 'buffer';
+import { postVaaSolana } from "@certusone/wormhole-sdk/lib/cjs/solana";
+import { type ChainId } from "@wormhole-foundation/sdk";
 import { toHex } from "./polygon";
 
 const realConfig = utils.deriveAddress([Buffer.from("config")], SOLANA_ADDRESS);
@@ -41,6 +43,42 @@ function deriveWormholeMessageKey(
             (() => {
                 const buf = Buffer.alloc(8);
                 buf.writeBigUInt64LE(sequence);
+                return buf;
+            })(),
+        ],
+        programId
+    );
+}
+
+function deriveForeignEmitterKey(
+    programId: PublicKeyInitData,
+    chain: ChainId
+) {
+    return utils.deriveAddress(
+        [
+            Buffer.from("foreign_emitter"),
+            (() => {
+                const buf = Buffer.alloc(2);
+                buf.writeUInt16LE(chain);
+                return buf;
+            })(),
+        ],
+        programId
+    );
+}
+
+function deriveReceivedKey(
+    programId: PublicKeyInitData,
+    chain: ChainId,
+    sequence: bigint
+) {
+    return utils.deriveAddress(
+        [
+            Buffer.from("received"),
+            (() => {
+                const buf = Buffer.alloc(10);
+                buf.writeUInt16LE(chain, 0);
+                buf.writeBigInt64LE(sequence, 2);
                 return buf;
             })(),
         ],
@@ -220,16 +258,60 @@ export const burnAndSend = async (program: any, amount: string, connection: Conn
     }
 }
 
+export const receiveMsgSolana = async (program: any, connection: Connection, wallet: WalletContextState, hex: Uint8Array, vaa: any) => {
+    const posted = await postVaaSolana(
+        connection,
+        wallet.signTransaction!,
+        WOMRHOLE_CORE_ADDRESS,
+        wallet.publicKey!,
+        Buffer.from(hex)
+    )
+    console.log('posted = ', posted)
+
+    const userTokenAccount = await getAssociatedTokenAddress(
+        mint,
+        wallet.publicKey!
+    );
+    console.log('userTokenAccount = ', userTokenAccount)
+
+    // let mintAuthorityPda: anchor.web3.PublicKey;
+    // [mintAuthorityPda] = await anchor.web3.PublicKey.findProgramAddressSync(
+    //     [Buffer.from("mint_authority")],
+    //     program.programId
+    // );
+
+    const mintAuthorityPda = utils.deriveAddress([Buffer.from("mint_authority")], program.programId);
+
+    const trx = await program.methods
+        .receiveAndMint([...vaa.hash])
+        .accounts({
+            payer: wallet.publicKey!,
+            config: realConfig,
+            wormholeProgram: new PublicKey(WOMRHOLE_CORE_ADDRESS),
+            posted: solanaCoreUtils.derivePostedVaaKey(WOMRHOLE_CORE_ADDRESS, vaa.hash),
+            foreignEmitter: deriveForeignEmitterKey(program.programId, vaa.emitterChain as ChainId),
+            received: deriveReceivedKey(
+                program.programId,
+                vaa.emitterChain as ChainId,
+                vaa.sequence
+            ),
+            user: wallet.publicKey,
+            userTokenAccount,
+            tokenMint: mint,
+            mintAuthority: mintAuthorityPda,
+            tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+    console.log('transaction = ', trx)
+}
+
 export async function getSolanaVaa(trx: string) {
     try {
         const wh = await wormhole("Testnet", [solana]);
         const chain = wh.getChain("Solana");
         const [whm] = await chain.parseTransaction(trx);
-        const vaa = await wh.getVaa(whm!, "Uint8Array", 60_000);
-        console.log('vaa = ', vaa);
         const vaaBytes = await wh.getVaaBytes(whm!, 60_000);
         const hex = toHex(vaaBytes!);
-        console.log('vaa hex = ', hex)
 
         return hex;
     } catch (err) {
