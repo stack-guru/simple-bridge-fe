@@ -49,16 +49,16 @@ export async function getEvmVaa(trx: string) {
     const wh = await wormhole("Testnet", [evm]);
     const chain = wh.getChain("PolygonSepolia");
     const [whm] = await chain.parseTransaction(trx);
-    const vaaBytes = await wh.getVaaBytes(whm!, 60_000);
-    // const vaa = await wh.getVaa(whm!, "Uint8Array", 80_000);
+    const vaaBytes = await wh.getVaaBytes(whm!, 200_000);
+    // const vaa = await wh.getVaa(whm!, "Uint8Array", 90_000);
     // console.log('vaa = ', vaa);
     console.log('bytes = ', vaaBytes);
     // const hex = toHex(vaaBytes!);
 
-    return { vaa: null, hex: vaaBytes };
+    return vaaBytes
   } catch (err) {
     console.log('get evm vaa: ', err);
   }
 
-  return { vaa: null, hex: null };
+  return null
 }

@@ -19,11 +19,12 @@ import {
 import evm from "@wormhole-foundation/sdk/evm";
 import solana from "@wormhole-foundation/sdk/solana";
 import { utils as solanaCoreUtils } from "@wormhole-foundation/sdk-solana-core";
-import { DECIMAL, WOMRHOLE_CORE_ADDRESS, TEST_USDV_SOLANA, TEST_USDT, SOLANA_ADDRESS, ETH_PRIVATE_KEY, SOL_PRIVATE_KEY, POLY_USDT } from "./constants"
+import { DECIMAL, WOMRHOLE_CORE_ADDRESS, TEST_USDV_SOLANA, TEST_USDT, SOLANA_ADDRESS, ETH_PRIVATE_KEY, SOL_PRIVATE_KEY, POLY_USDT, POLYGON_ADDRESS } from "./constants"
 import { type AnchorWallet, type WalletContextState } from "@solana/wallet-adapter-react";
 import { Buffer } from 'buffer';
 import { postVaaSolana } from "@certusone/wormhole-sdk/lib/cjs/solana";
-import { type ChainId } from "@wormhole-foundation/sdk";
+import { parseVaa } from "@certusone/wormhole-sdk/lib/cjs/vaa";
+import { type ChainId, chainToChainId } from "@wormhole-foundation/sdk";
 import { toHex } from "./polygon";
 
 const realConfig = utils.deriveAddress([Buffer.from("config")], SOLANA_ADDRESS);
@@ -258,51 +259,81 @@ export const burnAndSend = async (program: any, amount: string, connection: Conn
     }
 }
 
-export const receiveMsgSolana = async (program: any, connection: Connection, wallet: WalletContextState, hex: Uint8Array, vaa: any) => {
-    const posted = await postVaaSolana(
-        connection,
-        wallet.signTransaction!,
-        WOMRHOLE_CORE_ADDRESS,
-        wallet.publicKey!,
-        Buffer.from(hex)
-    )
-    console.log('posted = ', posted)
-
-    const userTokenAccount = await getAssociatedTokenAddress(
-        mint,
-        wallet.publicKey!
+export const registerForeignEmitter = async (program: any, wallet: WalletContextState) => {
+    const realForeignEmitter = deriveForeignEmitterKey(program.programId, chainToChainId("PolygonSepolia"));
+    const realForeignEmitterAddress = Buffer.from(
+        POLYGON_ADDRESS.toLowerCase().replace(/^0x/, "").padStart(64, "0"),
+        "hex"
     );
-    console.log('userTokenAccount = ', userTokenAccount)
 
-    // let mintAuthorityPda: anchor.web3.PublicKey;
-    // [mintAuthorityPda] = await anchor.web3.PublicKey.findProgramAddressSync(
-    //     [Buffer.from("mint_authority")],
-    //     program.programId
-    // );
+    const realRegisterEmitterAccounts = {
+        owner: wallet.publicKey,
+        config: realConfig,
+        foreignEmitter: realForeignEmitter,
+    }
 
-    const mintAuthorityPda = utils.deriveAddress([Buffer.from("mint_authority")], program.programId);
+    try {
+        const trx = await program.methods
+            .registerEmitter(chainToChainId("PolygonSepolia"), [...realForeignEmitterAddress])
+            .accounts({ ...realRegisterEmitterAccounts })
+            .rpc();
 
-    const trx = await program.methods
-        .receiveAndMint([...vaa.hash])
-        .accounts({
-            payer: wallet.publicKey!,
-            config: realConfig,
-            wormholeProgram: new PublicKey(WOMRHOLE_CORE_ADDRESS),
-            posted: solanaCoreUtils.derivePostedVaaKey(WOMRHOLE_CORE_ADDRESS, vaa.hash),
-            foreignEmitter: deriveForeignEmitterKey(program.programId, vaa.emitterChain as ChainId),
-            received: deriveReceivedKey(
-                program.programId,
-                vaa.emitterChain as ChainId,
-                vaa.sequence
-            ),
-            user: wallet.publicKey,
-            userTokenAccount,
-            tokenMint: mint,
-            mintAuthority: mintAuthorityPda,
-            tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-        })
-        .rpc();
-    console.log('transaction = ', trx)
+        console.log('register emitter trx = ', trx);
+    } catch (err) {
+        console.log('error: ', err)
+    }
+}
+
+export const receiveMsgSolana = async (program: any, connection: Connection, wallet: WalletContextState, vaaBytes: Uint8Array) => {
+    try {
+
+        const buffer = Buffer.from(vaaBytes)
+        const posted = await postVaaSolana(
+            connection,
+            wallet.signTransaction!,
+            WOMRHOLE_CORE_ADDRESS,
+            wallet.publicKey!,
+            buffer
+        )
+        console.log('posted = ', posted)
+        const parsed = parseVaa(buffer)
+        console.log('parsed = ', parsed)
+
+        const userTokenAccount = await getAssociatedTokenAddress(
+            mint,
+            wallet.publicKey!
+        );
+
+        const mintAuthorityPda = utils.deriveAddress([Buffer.from("mint_authority")], program.programId);
+
+        const trx = await program.methods
+            .receiveAndMint([...parsed.hash])
+            .accounts({
+                payer: wallet.publicKey!,
+                config: realConfig,
+                wormholeProgram: new PublicKey(WOMRHOLE_CORE_ADDRESS),
+                posted: solanaCoreUtils.derivePostedVaaKey(WOMRHOLE_CORE_ADDRESS, parsed.hash),
+                foreignEmitter: deriveForeignEmitterKey(program.programId, parsed.emitterChain as ChainId),
+                received: deriveReceivedKey(
+                    program.programId,
+                    parsed.emitterChain as ChainId,
+                    parsed.sequence
+                ),
+                user: wallet.publicKey,
+                userTokenAccount,
+                tokenMint: mint,
+                mintAuthority: mintAuthorityPda,
+                tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+            })
+            .rpc();
+        console.log('transaction = ', trx)
+
+        return trx
+    } catch (err) {
+        console.log(err)
+    }
+
+    return null
 }
 
 export async function getSolanaVaa(trx: string) {

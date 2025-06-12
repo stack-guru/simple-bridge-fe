@@ -131,12 +131,24 @@ export default function Polygon() {
 
             if (state?.status === "success") {
                 console.log('sent trx = ', sent)
-                setLoadingText("Searching Wormhole")
-                const { vaa, hex } = await getEvmVaa(sent)
+                setLoadingText("Searching Wormhole. This may take few minutes.")
+                const vaaBytes = await getEvmVaa(sent)
                 setLoadingText("")
 
-                if (vaa && hex) {
-                    await receiveMsgSolana(program, connection, solWallet, hex, vaa)
+                if (vaaBytes) {
+                    const received = await receiveMsgSolana(program, connection, solWallet, vaaBytes)
+
+                    if (received) {
+                        toaster.create({
+                            description: "Transfered!",
+                            type: "success"
+                        })
+                    } else {
+                        toaster.create({
+                            description: "Error on Solana",
+                            type: "error"
+                        })
+                    }
                 } else {
                     toaster.create({
                         description: "Wormhole scan error",
@@ -174,10 +186,11 @@ export default function Polygon() {
                 <Text fontSize={"sm"} marginBottom={2}>Get USDV on Solana</Text>
                 <HStack>
                     <Input type="number" placeholder="Amount" value={transferAmount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTransferAmount(e.target.value)} />
-                    <Button onClick={transferUSDV} bgColor={"blue.500"} loading={isTransfer} loadingText={loadingText}>
+                    <Button onClick={transferUSDV} bgColor={"blue.500"} loading={isTransfer} >
                         Transfer
                     </Button>
                 </HStack>
+                <Text textAlign={"center"} color={"blue.400"} marginTop={2} fontSize={"sm"}>{loadingText}</Text>
             </Card.Body>
         </Card.Root>
     )
