@@ -52,7 +52,7 @@ function App() {
         <Text><Span color={"cyan.300"}>0x205De93CDED7bA4384Df6F17E6225f928163b8E6</Span>  is Test USDV Token on Amoy(Polygon test network)</Text>
         <Text><Span color={"cyan.300"}>0x89810c79c774d7Cd2e6e3305957Cc2e8C408C8Ad</Span>  is Test USDT Token on Amoy(Polygon test network)</Text>
         <Text><Span color={"cyan.300"}>Dkz4WrqjhmgqQjHaZb5q26hh79JkgMApS2i8qaxi5PKt</Span>  is Test USDV Token on Solana</Text>
-        <Text>Amoy network is not working well with metamask. Please use other wallet like Rabby wallet.</Text>
+        <Text color={"yellow.300"}>The Amoy network doesn't work well with MetaMask. Please use a different wallet, such as Rabby Wallet.</Text>
       </Box>
     </Box>
   )
