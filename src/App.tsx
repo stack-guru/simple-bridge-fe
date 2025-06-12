@@ -1,6 +1,7 @@
-import { Button, Box, Heading, Card, HStack, VStack, Center, Icon, Input, Field, Text, Separator } from "@chakra-ui/react"
+import { Box, Heading, HStack, VStack, Center, Text, Separator, Icon, Span } from "@chakra-ui/react"
+import { MdInfo } from "react-icons/md"
 import { useWallet } from "@solana/wallet-adapter-react"
-import { Toaster, toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster"
 import {
   WalletModalProvider,
   WalletModalButton,
@@ -15,10 +16,10 @@ function App() {
   const { connected } = useWallet()
 
   return (
-    <Box paddingTop={8}>
+    <Box paddingTop={8} paddingX={16}>
       <Toaster />
       <Heading size={"4xl"} textAlign={"center"}>Bridge Testing!</Heading>
-      <Box marginTop={8} display={"flex"} justifyContent={"center"}>
+      <Box marginTop={4} display={"flex"} justifyContent={"center"}>
         <VStack>
           <Box textAlign={"center"}>
             <Text fontSize={"sm"}>Solana</Text>
@@ -43,6 +44,16 @@ function App() {
         <Polygon />
         <Solana />
       </HStack>
+      <Separator marginY={4} />
+      <Box textAlign={"center"}>
+        <Icon color={"cyan.400"} size={"lg"}>
+          <MdInfo />
+        </Icon>
+        <Text><Span color={"cyan.300"}>0x205De93CDED7bA4384Df6F17E6225f928163b8E6</Span>  is Test USDV Token on Amoy(Polygon test network)</Text>
+        <Text><Span color={"cyan.300"}>0x89810c79c774d7Cd2e6e3305957Cc2e8C408C8Ad</Span>  is Test USDT Token on Amoy(Polygon test network)</Text>
+        <Text><Span color={"cyan.300"}>Dkz4WrqjhmgqQjHaZb5q26hh79JkgMApS2i8qaxi5PKt</Span>  is Test USDV Token on Solana</Text>
+        <Text>Amoy network is not working well with metamask. Please use other wallet like Rabby wallet.</Text>
+      </Box>
     </Box>
   )
 }
