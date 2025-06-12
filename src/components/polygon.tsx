@@ -16,7 +16,7 @@ export default function Polygon() {
     const account = useAccount()
     const pClient = usePublicClient()
     const solWallet = useWallet()
-    const { program } = useProgram()
+    // const { program } = useProgram()
 
     const [mintAmount, setMintAmount] = useState("")
     const [transferAmount, setTransferAmount] = useState("")
@@ -29,8 +29,8 @@ export default function Polygon() {
         setIsAirdrop(true)
         const trx = await airdrop(account.address)
         if (trx) {
-            await pClient?.waitForTransactionReceipt({ hash: trx })
-            toaster.create({
+            const state = await pClient?.waitForTransactionReceipt({ hash: trx })
+            state?.status === "success" && toaster.create({
                 description: "Airdropped!",
                 type: "success"
             })
@@ -67,21 +67,23 @@ export default function Polygon() {
                     parseUnits(mintAmount, 6)
                 ]
             })
-            await pClient?.waitForTransactionReceipt({ hash: approved })
-            toaster.create({
-                description: "Approved!",
-                type: "info"
-            })
+            const state = await pClient?.waitForTransactionReceipt({ hash: approved })
+            if (state?.status === "success") {
+                toaster.create({
+                    description: "Approved!",
+                    type: "info"
+                })
 
-            const realAmount = Number(mintAmount) * 0.999
-            writeContractAsync({
-                abi,
-                address: POLYGON_ADDRESS,
-                functionName: 'mintToken',
-                args: [
-                    parseUnits(realAmount.toString(), 6)
-                ],
-            })
+                const realAmount = Number(mintAmount) * 0.999
+                writeContractAsync({
+                    abi,
+                    address: POLYGON_ADDRESS,
+                    functionName: 'mintToken',
+                    args: [
+                        parseUnits(realAmount.toString(), 6)
+                    ],
+                })
+            }
         } catch (err) {
             console.log('err: ', err)
         }
@@ -117,16 +119,18 @@ export default function Polygon() {
                     parseUnits(transferAmount, 6)
                 ],
             })
-            await pClient?.waitForTransactionReceipt({ hash: sent })
-            const vaa = await getEvmVaa(sent)
-            if (vaa) {
-                // const posted = await postVaaSolana(
-                //     connection,
-                //     nodeWallet.signTransaction,
-                //     CORE_CONTRACT,
-                //     nodeWallet.key(),
-                //     Buffer.from(vaa.bytes)
-                // );
+            const state = await pClient?.waitForTransactionReceipt({ hash: sent })
+            if (state?.status === "success") {
+                const vaa = await getEvmVaa(sent)
+                if (vaa) {
+                    // const posted = await postVaaSolana(
+                    //     connection,
+                    //     nodeWallet.signTransaction,
+                    //     CORE_CONTRACT,
+                    //     nodeWallet.key(),
+                    //     Buffer.from(vaa.bytes)
+                    // );
+                }
             }
         } catch (err) {
             console.log('transfer err: ', err)

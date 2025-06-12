@@ -38,8 +38,8 @@ export async function airdrop(user: any) {
   return null
 }
 
-function toHex(bytes: Uint8Array): string {
-  return Array.from(bytes)
+export function toHex(bytes: Uint8Array): string {
+  return '0x' + Array.from(bytes)
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
 }
