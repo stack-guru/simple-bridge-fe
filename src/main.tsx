@@ -16,12 +16,15 @@ import {
   QueryClientProvider,
   QueryClient,
 } from "@tanstack/react-query";
+import { Buffer } from 'buffer';
 
 const config = getDefaultConfig({
   appName: 'Bridge-Fe',
   projectId: '809c21f7485230c40994531fdd5957cc',
   chains: [polygon, polygonAmoy],
 });
+
+window.Buffer = Buffer;
 
 const queryClient = new QueryClient();
 
