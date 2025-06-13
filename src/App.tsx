@@ -59,7 +59,7 @@ function App() {
         <Text><Span color={"cyan.300"}>Dkz4WrqjhmgqQjHaZb5q26hh79JkgMApS2i8qaxi5PKt</Span>  is Test USDV Token on Solana</Text>
         <Text color={"yellow.300"}>The Amoy network doesn't work well with MetaMask. Please use a different wallet, such as Rabby Wallet.</Text>
         {/* <Button marginTop={4} onClick={() => testTransfer()}>Transfer USDT</Button> */}
-        <Text marginTop={4}>Please get Amoy test token from this site.  <Link color={"cyan.200"}>https://faucet.stakepool.dev.br/amoy</Link></Text>
+        <Text marginTop={4}>Please get Amoy Pol token from this site.  <Link color={"cyan.200"}>https://faucet.stakepool.dev.br/amoy</Link></Text>
         <Text>Please get Solana devenet Sol from this site.  <Link color={"cyan.200"}>https://faucet.solana.com/</Link></Text>
       </Box>
     </Box>
