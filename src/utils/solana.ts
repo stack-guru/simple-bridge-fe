@@ -2,7 +2,7 @@ import * as anchor from "@coral-xyz/anchor"
 import {
     getAssociatedTokenAddress
 } from "@solana/spl-token"
-import { PublicKey, Connection, type PublicKeyInitData, clusterApiUrl } from "@solana/web3.js";
+import { PublicKey, Connection, type PublicKeyInitData } from "@solana/web3.js";
 import { utils } from '@wormhole-foundation/sdk-solana';
 import {
     wormhole,
@@ -12,8 +12,6 @@ import {
     type Network,
     type Signer,
     type Chain,
-    type TokenId,
-    isTokenId,
     signSendWait,
     amount
 } from "@wormhole-foundation/sdk";

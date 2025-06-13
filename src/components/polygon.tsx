@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Box, Heading, Card, HStack, VStack, Center, Icon, Input, Field, Text, Separator, Spinner } from "@chakra-ui/react"
+import { Button, Card, HStack, Input, Text, Separator } from "@chakra-ui/react"
 import { useAccount, useWriteContract, usePublicClient } from 'wagmi'
 import { useWallet } from "@solana/wallet-adapter-react"
 import { readContract } from '@wagmi/core'

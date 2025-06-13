@@ -1,4 +1,4 @@
-import { Box, Heading, HStack, VStack, Center, Text, Separator, Icon, Span, Button } from "@chakra-ui/react"
+import { Box, Heading, HStack, VStack, Center, Text, Separator, Icon, Span } from "@chakra-ui/react"
 import { MdInfo } from "react-icons/md"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { Toaster } from "@/components/ui/toaster"
@@ -11,14 +11,14 @@ import "@solana/wallet-adapter-react-ui/styles.css"
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Polygon from "./components/polygon"
 import Solana from "./components/solana"
-import { transferUSDT } from "./utils/solana"
+// import { transferUSDT } from "./utils/solana"
 
 function App() {
   const { connected } = useWallet()
 
-  const testTransfer = async () => {
-    await transferUSDT()
-  }
+  // const testTransfer = async () => {
+  //   await transferUSDT()
+  // }
 
   return (
     <Box paddingTop={8} paddingX={16}>
