@@ -1,4 +1,4 @@
-import { Box, Heading, HStack, VStack, Center, Text, Separator, Icon, Span } from "@chakra-ui/react"
+import { Box, Heading, HStack, VStack, Center, Text, Separator, Icon, Span, Button } from "@chakra-ui/react"
 import { MdInfo } from "react-icons/md"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { Toaster } from "@/components/ui/toaster"
@@ -11,9 +11,14 @@ import "@solana/wallet-adapter-react-ui/styles.css"
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Polygon from "./components/polygon"
 import Solana from "./components/solana"
+import { transferUSDT } from "./utils/solana"
 
 function App() {
   const { connected } = useWallet()
+
+  const testTransfer = async () => {
+    await transferUSDT()
+  }
 
   return (
     <Box paddingTop={8} paddingX={16}>
@@ -53,6 +58,7 @@ function App() {
         <Text><Span color={"cyan.300"}>0x89810c79c774d7Cd2e6e3305957Cc2e8C408C8Ad</Span>  is Test USDT Token on Amoy(Polygon test network)</Text>
         <Text><Span color={"cyan.300"}>Dkz4WrqjhmgqQjHaZb5q26hh79JkgMApS2i8qaxi5PKt</Span>  is Test USDV Token on Solana</Text>
         <Text color={"yellow.300"}>The Amoy network doesn't work well with MetaMask. Please use a different wallet, such as Rabby Wallet.</Text>
+        {/* <Button marginTop={4} onClick={() => testTransfer()}>Transfer USDT</Button> */}
       </Box>
     </Box>
   )

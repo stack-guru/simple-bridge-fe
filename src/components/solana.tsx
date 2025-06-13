@@ -68,7 +68,7 @@ export default function Solana() {
             <Card.Body>
                 <Text fontSize={"sm"} marginBottom={2}>USDV{`->`}USDT</Text>
                 <Input type="number" placeholder="Amount" value={redeemAmount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRedeemAmount(e.target.value)} />
-                <Button marginTop={4} onClick={redeemToken} loading={isRedeem}>Redeem</Button>
+                <Button marginTop={4} onClick={redeemToken} loading={isRedeem} bgColor={"blue.500"}>Redeem</Button>
             </Card.Body>
         </Card.Root>
     )

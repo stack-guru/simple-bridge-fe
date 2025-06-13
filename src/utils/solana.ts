@@ -2,7 +2,7 @@ import * as anchor from "@coral-xyz/anchor"
 import {
     getAssociatedTokenAddress
 } from "@solana/spl-token"
-import { PublicKey, Connection, type PublicKeyInitData } from "@solana/web3.js";
+import { PublicKey, Connection, type PublicKeyInitData, clusterApiUrl } from "@solana/web3.js";
 import { utils } from '@wormhole-foundation/sdk-solana';
 import {
     wormhole,
@@ -14,12 +14,13 @@ import {
     type Chain,
     type TokenId,
     isTokenId,
-    signSendWait
+    signSendWait,
+    amount
 } from "@wormhole-foundation/sdk";
 import evm from "@wormhole-foundation/sdk/evm";
 import solana from "@wormhole-foundation/sdk/solana";
 import { utils as solanaCoreUtils } from "@wormhole-foundation/sdk-solana-core";
-import { DECIMAL, WOMRHOLE_CORE_ADDRESS, TEST_USDV_SOLANA, TEST_USDT, SOLANA_ADDRESS, ETH_PRIVATE_KEY, SOL_PRIVATE_KEY, POLY_USDT, POLYGON_ADDRESS } from "./constants"
+import { DECIMAL, WOMRHOLE_CORE_ADDRESS, TEST_USDV_SOLANA, TEST_USDT, SOLANA_ADDRESS, ETH_PRIVATE_KEY, SOL_PRIVATE_KEY, POLYGON_ADDRESS, POLYGON_USDT } from "./constants"
 import { type AnchorWallet, type WalletContextState } from "@solana/wallet-adapter-react";
 import { Buffer } from 'buffer';
 import { postVaaSolana } from "@certusone/wormhole-sdk/lib/cjs/solana";
@@ -153,7 +154,7 @@ export const setAttestation = async () => {
     const wh = await wormhole('Testnet', [evm, solana]);
 
     const srcChain = wh.getChain('PolygonSepolia');
-    const destChain = wh.getChain('BaseSepolia');
+    const destChain = wh.getChain('Solana');
 
     const token = Wormhole.tokenId(srcChain.chain, TEST_USDT);
     const { signer: origSigner } = await getSigner(srcChain);
@@ -350,4 +351,61 @@ export async function getSolanaVaa(trx: string) {
     }
 
     return null;
+}
+
+export async function transferUSDT() {
+    // Initialize Wormhole SDK for Solana and Sepolia on Testnet
+    const wh = await wormhole('Mainnet', [solana, evm], {
+        chains: {
+            Solana: {
+                rpc: "https://solana-mainnet.g.alchemy.com/v2/hFobZjKlp6QklQ6MupDr3aa6mWV24Yn0"
+            }
+        }
+    });
+
+    // Define the source and destination chains
+    const sendChain = wh.getChain('Polygon');
+    const rcvChain = wh.getChain('Solana');
+
+    // Load signers and addresses from helpers
+    const source = await getSigner(sendChain);
+    const destination = await getSigner(rcvChain);
+
+    // Define the token and amount to transfer
+    const tokenId = Wormhole.tokenId('Polygon', POLYGON_USDT);
+    const amt = '0.1';
+
+    // Convert to raw units based on token decimals
+    const decimals = DECIMAL;
+    const transferAmount = amount.units(amount.parse(amt, decimals));
+
+    // Set to false to require manual approval steps
+    const automatic = false;
+    const nativeGas = automatic ? amount.units(amount.parse('0.0', 6)) : 0n;
+
+    // Construct the transfer object
+    const xfer = await wh.tokenTransfer(
+        tokenId,
+        transferAmount,
+        source.address,
+        destination.address,
+        automatic,
+        undefined,
+        nativeGas
+    );
+
+    // Initiate the transfer from Solana
+    console.log('Starting Transfer');
+    const srcTxids = await xfer.initiateTransfer(source.signer);
+    console.log(`Started Transfer: `, srcTxids);
+
+    // Wait for the signed attestation from the Guardian network
+    console.log('Fetching Attestation');
+    const timeout = 5 * 60 * 1000; // 5 minutes
+    await xfer.fetchAttestation(timeout);
+
+    // Redeem the tokens on Sepolia
+    console.log('Completing Transfer');
+    const destTxids = await xfer.completeTransfer(destination.signer);
+    console.log(`Completed Transfer: `, destTxids);
 }
