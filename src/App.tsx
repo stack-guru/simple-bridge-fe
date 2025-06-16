@@ -1,4 +1,4 @@
-import { Box, Heading, HStack, VStack, Center, Text, Separator, Icon, Span, Link } from "@chakra-ui/react"
+import { Box, Heading, VStack, Center, Text, Separator, Icon, Span, Link } from "@chakra-ui/react"
 import { MdInfo } from "react-icons/md"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { Toaster } from "@/components/ui/toaster"
