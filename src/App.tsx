@@ -21,7 +21,7 @@ function App() {
   // }
 
   return (
-    <Box paddingTop={8} paddingX={16}>
+    <Box paddingTop={4} paddingX={2} md={{ paddingX: 8, paddingTop: 8 }}>
       <Toaster />
       <Heading size={"4xl"} textAlign={"center"}>Bridge Testing!</Heading>
       <Box marginTop={4} display={"flex"} justifyContent={"center"}>
@@ -45,12 +45,12 @@ function App() {
           </Box>
         </VStack>
       </Box>
-      <HStack align={"center"} width={"full"} justifyContent={"center"} gap={8} marginTop={8}>
+      <VStack justifyContent={"center"} gap={4} marginTop={8} md={{ flexDirection: "row" }}>
         <Polygon />
         <Solana />
-      </HStack>
+      </VStack>
       <Separator marginY={4} />
-      <Box textAlign={"center"}>
+      <Box textAlign={"center"} marginBottom={2}>
         <Icon color={"cyan.400"} size={"lg"}>
           <MdInfo />
         </Icon>

@@ -61,7 +61,7 @@ export default function Solana() {
     }
 
     return (
-        <Card.Root width={"540px"}>
+        <Card.Root width={"full"} md={{ width: "540px" }}>
             <Card.Header>
                 <Card.Title mb="2">Redeem USDV on Solana</Card.Title>
             </Card.Header>

@@ -163,7 +163,7 @@ export default function Polygon() {
     }
 
     return (
-        <Card.Root width={"540px"}>
+        <Card.Root width={"full"} md={{ width: "540px" }}>
             <Card.Header>
                 <Card.Title>Get USDV on Solana (Polygon to Solana)</Card.Title>
             </Card.Header>
