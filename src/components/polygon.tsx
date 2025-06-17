@@ -136,7 +136,9 @@ export default function Polygon() {
                 setLoadingText("")
 
                 if (vaaBytes) {
+                    setLoadingText("Getting token on Solana.")
                     const received = await receiveMsgSolana(program, connection, solWallet, vaaBytes)
+                    setLoadingText("")
 
                     if (received) {
                         toaster.create({
