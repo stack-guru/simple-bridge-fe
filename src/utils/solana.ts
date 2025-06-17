@@ -1,8 +1,9 @@
 import * as anchor from "@coral-xyz/anchor"
 import {
-    getAssociatedTokenAddress
+    createAssociatedTokenAccountInstruction,
+    getAssociatedTokenAddress,
 } from "@solana/spl-token"
-import { PublicKey, Connection, type PublicKeyInitData } from "@solana/web3.js";
+import { PublicKey, Connection, type PublicKeyInitData, Transaction } from "@solana/web3.js";
 import { utils } from '@wormhole-foundation/sdk-solana';
 import {
     wormhole,
@@ -298,10 +299,15 @@ export const receiveMsgSolana = async (program: any, connection: Connection, wal
         const parsed = parseVaa(buffer)
         console.log('parsed = ', parsed)
 
-        const userTokenAccount = await getAssociatedTokenAddress(
-            mint,
-            wallet.publicKey!
-        );
+        // const userTokenAccount = await getAssociatedTokenAddress(
+        //     mint,
+        //     wallet.publicKey!,
+        // );
+
+        const userTokenAccount = await createAta(
+            connection,
+            wallet
+        )
 
         const mintAuthorityPda = utils.deriveAddress([Buffer.from("mint_authority")], program.programId);
 
@@ -406,4 +412,34 @@ export async function transferUSDT() {
     console.log('Completing Transfer');
     const destTxids = await xfer.completeTransfer(destination.signer);
     console.log(`Completed Transfer: `, destTxids);
+}
+
+export async function createAta(connection: Connection, wallet: WalletContextState) {
+    const ataAddress = await getAssociatedTokenAddress(mint, wallet.publicKey!);
+
+    const ataAccount = await connection.getAccountInfo(ataAddress);
+
+    if (ataAccount === null) {
+        const createAtaInstruction = createAssociatedTokenAccountInstruction(
+            wallet.publicKey!,
+            ataAddress,
+            wallet.publicKey!,
+            mint
+        );
+        const transaction = new Transaction().add(createAtaInstruction);
+
+        if (wallet && wallet.signTransaction) {
+            transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+            transaction.feePayer = wallet.publicKey!;
+
+            const signedTx = await wallet.signTransaction(transaction)
+            const txid = await connection.sendRawTransaction(signedTx.serialize())
+            await connection.confirmTransaction(txid);
+            console.log("ATA created:", ataAddress.toBase58());
+        }
+    } else {
+        console.log("ATA already exists:", ataAddress.toBase58());
+    }
+
+    return ataAddress;
 }
